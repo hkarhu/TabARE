@@ -18,7 +18,7 @@ import org.opencv.core.RotatedRect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class TrackableTripcode extends TrackableItem {
+public class TrackableTripcode extends TrackableObject {
 
 		private static final int BUFFER_SIZE = 5;
 		private static final int PROXIMITY = 24;

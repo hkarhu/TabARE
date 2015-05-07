@@ -77,8 +77,7 @@ public class OpenCVUtils {
 			int elemSize = (int)matrix.elemSize();  
 			data = new byte[cols * rows * elemSize];
 			matrix.get(0, 0, data);
-			type = BufferedImage.TYPE_BYTE_GRAY;
-			image = new BufferedImage(cols, rows, type);
+			image = new BufferedImage(cols, rows, BufferedImage.TYPE_BYTE_GRAY);
 			image.getRaster().setDataElements(0, 0, cols, rows, data);
 			break;
 
@@ -87,9 +86,8 @@ public class OpenCVUtils {
 			data = new byte[width * height * channels];  
 			matrix.get(0, 0, data);  
 			// create new image and get reference to backing data  
-			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);  
-			final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();  
-			System.arraycopy(data, 0, targetPixels, 0, data.length);
+			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+			image.getRaster().setDataElements(0, 0, cols, rows, data);
 			break;
 
 		default:  

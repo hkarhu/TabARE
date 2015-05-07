@@ -3,8 +3,8 @@ package fi.conf.tabare;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import fi.conf.tabare.CamImageProcessor.Blur;
-import fi.conf.tabare.CamImageProcessor.MorphOps;
+import fi.conf.tabare.ARDataProvider.Blur;
+import fi.conf.tabare.ARDataProvider.MorphOps;
 
 public class Params implements Serializable {
 	

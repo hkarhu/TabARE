@@ -2,9 +2,12 @@ package fi.conf.tabare;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 
@@ -106,6 +109,12 @@ public class PreviewPanel extends JPanel {
 
 	public void swapOverlay() {
 		outputOverlayIndex = !outputOverlayIndex;
+	}
+	
+	@Override
+	protected void processMouseEvent(MouseEvent e) {
+		e.translatePoint(-(getWidth()/2)+(videoWidth/2), -(getHeight()/2)+(videoHeight/2));
+		super.processMouseEvent(e);
 	}
 	
 }

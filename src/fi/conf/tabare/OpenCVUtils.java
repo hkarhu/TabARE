@@ -1,10 +1,7 @@
 package fi.conf.tabare;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 
 import org.opencv.core.Mat;
-
-import fi.conf.ae.routines.S;
 
 
 public class OpenCVUtils {

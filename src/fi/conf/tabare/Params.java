@@ -8,6 +8,9 @@ import fi.conf.tabare.ARDataProvider.MorphOps;
 
 public class Params implements Serializable {
 	
+	//Calibration
+	public int[][][] calibrationData;
+	
 	//Input image params
 	public float brightness = 0f;
 	public float contrast = 1.0f;

@@ -70,10 +70,9 @@ public abstract class TrackableObject {
 		return y;
 	}
 
-	public void setCalibration(double[] cc) {
+	public void fixLocation(double[] cc) {
 		this.x = cc[0];
 		this.y = cc[1];
-		
 		//System.out.println(x + " " + y);
 	}
 

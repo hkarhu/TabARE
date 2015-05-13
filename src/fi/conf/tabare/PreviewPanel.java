@@ -33,8 +33,6 @@ public class PreviewPanel extends JPanel {
 	private int videoHeight = -1;
 	private int videoWidth = -1;
 	
-	private boolean initialized = false;
-	
 	public PreviewPanel() {
 		this.setPreferredSize(new Dimension(800, 600));
 	}
@@ -53,7 +51,6 @@ public class PreviewPanel extends JPanel {
 			dataOverlayGraphics[0].setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 			dataOverlayGraphics[1].setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
 		}
-		initialized = true;
 	}
 
 	public void updatePreviewImage(Mat mat){
@@ -113,8 +110,16 @@ public class PreviewPanel extends JPanel {
 	
 	@Override
 	protected void processMouseEvent(MouseEvent e) {
+		//Intercept and traslate MouseEvents point to correspond the video frame.
 		e.translatePoint(-(getWidth()/2)+(videoWidth/2), -(getHeight()/2)+(videoHeight/2));
 		super.processMouseEvent(e);
+	}
+	
+	@Override
+	protected void processMouseMotionEvent(MouseEvent e) {
+		//Intercept and traslate MouseEvents point to correspond the video frame.
+		e.translatePoint(-(getWidth()/2)+(videoWidth/2), -(getHeight()/2)+(videoHeight/2));
+		super.processMouseMotionEvent(e);
 	}
 	
 }

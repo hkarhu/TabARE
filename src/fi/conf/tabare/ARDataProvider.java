@@ -162,8 +162,6 @@ public class ARDataProvider extends JFrame {
     	trackedTripcodes = new ConcurrentHashMap<>();
     	trackedBlobs = new ConcurrentLinkedQueue<>();
 
-    	loadParams();
-
 		int videoInID = MAX_VIDEO_DEVICE_INDEX/2;
 		
 		//Init
@@ -200,6 +198,9 @@ public class ARDataProvider extends JFrame {
 		//TODO: Load calibration values from storage!
 		
 		camPreviewPanel.addMouseListener(calibrator);
+		camPreviewPanel.addMouseMotionListener(calibrator);
+		
+		loadParams();
 		
 		detectionThread = new Thread(){
 			@Override
@@ -238,6 +239,10 @@ public class ARDataProvider extends JFrame {
 			e.printStackTrace();
 			params = new Params();
 		}
+		
+		//Calibration
+		calibrator.setRawCalibrationData(params.calibrationData);
+		
 		//Input filters
 		sliderContrast.setValue((int)(params.contrast/0.03f));
 		sliderBrightness.setValue((int)((params.brightness+255)/5.12f ));
@@ -245,6 +250,7 @@ public class ARDataProvider extends JFrame {
 	 
 		//Blob
 		sliderThresholdBlob.setValue((int)((params.blobThreshold-1)/2.54f));
+		checkInvertThreshTrip.setSelected(params.tripThInverted);
 		
 		//Trip
 		morphOpsComboBoxTrip.setSelectedIndex(params.tripMorphOps.ordinal());
@@ -261,6 +267,9 @@ public class ARDataProvider extends JFrame {
     }
     
     private void saveParams(){
+    	
+    	params.calibrationData = calibrator.getRawCalibrationData();
+    	
     	try {
 			FileOutputStream fileOut = new FileOutputStream(PARAMS_FILE);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);

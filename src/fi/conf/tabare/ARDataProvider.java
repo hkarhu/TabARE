@@ -43,7 +43,7 @@ import fi.conf.tabare.TrackableObject.ItemType;
  */
 public class ARDataProvider extends JFrame {
 	
-	private static final String PARAMS_FILE = "params.ser";
+	private static final String PARAMS_FILE = "saved_params.ser";
 	private static final int MAX_VIDEO_DEVICE_INDEX = 5;
 	
 	static {
@@ -112,6 +112,8 @@ public class ARDataProvider extends JFrame {
 	
     private Params params;
     
+    private Reality reality;
+    
 	private VideoCapture inputVideo;
 	private int videoWidth = 0;
 	private int videoHeight = 0;
@@ -162,6 +164,8 @@ public class ARDataProvider extends JFrame {
     	trackedTripcodes = new ConcurrentHashMap<>();
     	trackedBlobs = new ConcurrentLinkedQueue<>();
 
+    	reality = new Reality();
+    	
 		int videoInID = MAX_VIDEO_DEVICE_INDEX/2;
 		
 		//Init
@@ -430,9 +434,9 @@ public class ARDataProvider extends JFrame {
 					double[] c = r.get(i, 0);
 					TrackableBlob blob = null;
 					for(TrackableBlob cb : trackedBlobs){
-						if(cb.isCloseTo(c[0], c[1])){
+						if(cb.getProximity(c[0], c[1], 0)){
 							blob = cb;
-							cb.update(c[0], c[1], c[2], 1);
+							cb.update(c[0], c[1], 0, c[2], 1);
 							break;
 						}
 					}

@@ -1,9 +1,10 @@
 package fi.conf.tabare;
 
+import javax.sound.midi.Track;
+
 public abstract class TrackableObject {
 
-	protected final double MERGE_PROXIMITY_SPREAD = 10f;
-	protected final int DECAY_MS = 80;
+	protected final int DECAY_MS = 100;
 	
 	public enum ItemType { blob, tripFiducial }
 	
@@ -11,47 +12,39 @@ public abstract class TrackableObject {
 	protected int id = -1;
 	
 	protected long timeLastSeen;
-	protected double x, y;
-	protected double rawX, rawY;
-	protected double radius = 1;
-	
+	protected double x, y, z;
+	protected double rawX, rawY, rawZ;
 	protected double quality = 0;
-	protected boolean active = true;
 		
-	public TrackableObject(double x, double y, int id, ItemType itemType) {
-		this.id = id;
+	public TrackableObject(ItemType itemType, double rawX, double rawY, double rawZ) {
+		this.id = Reality.getNewID();
 		this.itemType = itemType;
-		update(x, y, radius, quality);
+		update(rawX, rawY, rawZ, quality);
 	}
 	
-	public void update(double x, double y, double radius, double quality){
-		this.radius = radius; 
+	public void update(double rawX, double rawY, double rawZ, double quality){
 		this.quality = quality;
 		this.timeLastSeen = System.currentTimeMillis();
-		this.rawX = x; this.rawY = y;
+		this.rawX = rawX; this.rawY = rawY; this.rawZ = rawZ;
 	}
 	
-	public boolean isCloseTo(double nx, double ny){
-		double d = Math.sqrt(Math.pow(nx-rawX, 2) + Math.pow(ny-rawY, 2));
-		if(d > radius + MERGE_PROXIMITY_SPREAD) return false;
-		return true;
-	}
+	public abstract boolean getProximity(double nx, double ny, double nz);
 	
 	public double getQuality(){
-		return quality;
+		double q = quality*(1-getDecay());
+		if(quality > 0) return q; else return 0;
 	}
 	
-	public boolean isDead(){
-		if(System.currentTimeMillis() < timeLastSeen+DECAY_MS) return false;
-		return true;
+	/**
+	 * If this is larger than 1.0f then the object has decayed and shouldn't be used in interaction.
+	 * @return
+	 */
+	public float getDecay(){
+		return (System.currentTimeMillis()-timeLastSeen)/(float)DECAY_MS;
 	}
 	
 	public int getID(){
 		return id;
-	}
-	
-	public double getRadius(){
-		return radius;
 	}
 
 	public double getRawX() {
@@ -61,6 +54,10 @@ public abstract class TrackableObject {
 	public double getRawY() {
 		return rawY;
 	}
+
+	public double getRawZ() {
+		return rawZ;
+	}
 	
 	public double getX(){
 		return x;
@@ -69,10 +66,19 @@ public abstract class TrackableObject {
 	public double getY(){
 		return y;
 	}
+	
+	public double getZ(){
+		return z;
+	}
 
+	/**
+	 * Calibrator uses this to set the calibrated coordinates.
+	 * @param cc
+	 */
 	public void fixLocation(double[] cc) {
 		this.x = cc[0];
 		this.y = cc[1];
+		this.z = cc[2];
 		//System.out.println(x + " " + y);
 	}
 

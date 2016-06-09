@@ -53,6 +53,10 @@ public class ARDataProvider extends JFrame {
 		//System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
 	}
 	
+	public static void main(String[] args) {
+		(new ARDataProvider()).setVisible(true);
+	}
+	
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox blurComboBox;
     private javax.swing.JButton buttonRemoveBackg;
@@ -311,13 +315,13 @@ public class ARDataProvider extends JFrame {
 				
 				if(selectedView == View.raw) preview_image = input_image.clone();
 				
-//				if(background == null) background = input_image.clone();			
-//				if(recaptureBg){
-//					backgSubstractor.apply(background, background);
-//					System.out.println(background.channels() + " " + background.size() );
-//					System.out.println(input_image.channels() + " " + input_image.size() );
-//					recaptureBg = false;
-//				}
+				if(background == null) background = input_image.clone();			
+				if(recaptureBg){
+					backgSubstractor.apply(background, background);
+					System.out.println(background.channels() + " " + background.size() );
+					System.out.println(input_image.channels() + " " + input_image.size() );
+					recaptureBg = false;
+				}
 //				if(dynamicBGRemoval){
 //					//Imgproc.accumulateWeighted(input_image, background, dynamicBGAmount);
 //					//Imgproc.accumulateWeighted(input_image, background, 1.0f);
@@ -332,7 +336,9 @@ public class ARDataProvider extends JFrame {
 				if(blobTracking){
 					Mat blobs_image = input_image.clone();
 					
-					Imgproc.threshold(blobs_image, blobs_image, params.blobThreshold, 254, (params.blobThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY));
+					//Imgproc.threshold(blobs_image, blobs_image, params.blobThreshold, 254, (params.blobThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY));
+					
+					Imgproc.adaptiveThreshold(blobs_image, blobs_image, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_MEAN_C, 5, params.blobThreshold);
 					
 					switch(params.blobMorphOps){
 						case dilate:
@@ -358,11 +364,11 @@ public class ARDataProvider extends JFrame {
 				if(tripTracking){
 					Mat trips_image = input_image.clone();
 		
-//					if(params.tripAdaptThreshold){
-//						Imgproc.adaptiveThreshold(input_image, trips_image, 254, (params.tripThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY), Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 5, params.tripThreshold);
-//					} else {
-//						Imgproc.threshold(input_image, trips_image, params.tripThreshold, 254, (params.tripThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY));	
-//					}
+					if(params.tripAdaptThreshold){
+						Imgproc.adaptiveThreshold(input_image, trips_image, 254, (params.tripThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY), Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 5, params.tripThreshold);
+					} else {
+						Imgproc.threshold(input_image, trips_image, params.tripThreshold, 254, (params.tripThInverted ? Imgproc.THRESH_BINARY_INV : Imgproc.THRESH_BINARY));	
+					}
 					
 					switch(params.tripMorphOps){
 					case dilate:

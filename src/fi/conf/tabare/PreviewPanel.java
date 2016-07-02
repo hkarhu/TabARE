@@ -27,6 +27,8 @@ public class PreviewPanel extends JPanel {
 	private Graphics2D[] dataOverlayGraphics;
 	private volatile boolean outputOverlayIndex = false;
 	
+	private volatile boolean showAlignmentGrid = false;
+	
 	private float trackTime = 0;
 	private float detectTime = 0;
 	
@@ -57,6 +59,7 @@ public class PreviewPanel extends JPanel {
 		//synchronized (previewLock) {
 			if(previewImage == null || mat.channels() != previewImageChannels){
 				previewImage = OpenCVUtils.matToBufferedImage(mat);
+				if(previewImage == null) return;
 				previewImageChannels = mat.channels();
 				imageData = ((DataBufferByte) previewImage.getRaster().getDataBuffer()).getData();
 			} else {
@@ -71,6 +74,7 @@ public class PreviewPanel extends JPanel {
 		Graphics2D g2 = (Graphics2D)g;
 		g2.setColor(Color.DARK_GRAY);
 		g2.fillRect(0, 0, getWidth(), getHeight());
+		
 		//synchronized (previewLock) {
 		if(previewImage != null){
 			g2.drawImage(previewImage, (getWidth()/2)-(videoWidth/2), (getHeight()/2)-(videoHeight/2), null);	
@@ -106,6 +110,10 @@ public class PreviewPanel extends JPanel {
 
 	public void swapOverlay() {
 		outputOverlayIndex = !outputOverlayIndex;
+	}
+	
+	public void showAlignmentGrid(boolean visible){
+		this.showAlignmentGrid = visible;
 	}
 	
 	@Override

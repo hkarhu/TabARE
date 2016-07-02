@@ -5,7 +5,8 @@ import org.opencv.core.Mat;
 
 
 public class OpenCVUtils {
-
+	
+	//OpenCV from nu.pattern is missing these.
 	public static int CAP_PROP_POS_MSEC		  =0;
 	public static int CAP_PROP_POS_FRAMES     =1;
 	public static int CAP_PROP_POS_AVI_RATIO  =2;

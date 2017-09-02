@@ -11,13 +11,17 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -44,22 +48,15 @@ import javax.swing.event.ChangeListener;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.BackgroundSubtractor;
-import org.opencv.video.BackgroundSubtractorMOG2;
 
 import fi.conf.tabare.Params.Blur;
 import fi.conf.tabare.Params.MorphOps;
 import fi.conf.tabare.TrackableObject.ItemType;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 
 /**
  *
@@ -75,10 +72,6 @@ public class ARDataProvider extends JFrame {
 		nu.pattern.OpenCV.loadShared();
 		//nu.pattern.OpenCV.loadLocally();
 		//System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
-	}
-
-	public static void main(String[] args) {
-		(new ARDataProvider()).setVisible(true);
 	}
 
 	// Variables declaration - do not modify//GEN-BEGIN:variables
@@ -142,6 +135,7 @@ public class ARDataProvider extends JFrame {
 	private Params params;
 
 	private Reality reality;
+	private List<RealityChangeListener> listeners = new ArrayList<RealityChangeListener>();
 
 	private VideoCapture inputVideo;
 	//	private int videoWidth = 0;
@@ -171,9 +165,8 @@ public class ARDataProvider extends JFrame {
 	private FeatureDetector blobFeatureDetector;
 	private int lastBlobIndex = 0;
 	private ConcurrentLinkedQueue<MatOfKeyPoint> blobData;
-	private ConcurrentLinkedQueue<TrackableBlob> trackedBlobs;
-
 	private ConcurrentLinkedQueue<TripcodeCandidateSample> tripcodeData;
+	private ConcurrentLinkedQueue<TrackableBlob> trackedBlobs;
 	private ConcurrentHashMap<Integer,TrackableTripcode> trackedTripcodes;
 
 	private View selectedView = View.raw;
@@ -201,15 +194,18 @@ public class ARDataProvider extends JFrame {
 	 */
 	public ARDataProvider() {
 
+		this.reality = new Reality();
+		
 		blobData = new ConcurrentLinkedQueue<>();
 		tripcodeData = new ConcurrentLinkedQueue<>();
-		trackedTripcodes = new ConcurrentHashMap<>();
-		trackedBlobs = new ConcurrentLinkedQueue<>();
+		trackedTripcodes = reality.getTrackedTripcodes();
+		trackedBlobs = reality.getTrackedBlobs();
 
 		reality = new Reality();
 
 		int videoInID = MAX_VIDEO_DEVICE_INDEX/2;
-
+		
+		
 		//Init
 		while(inputVideo == null || frameSize == null || (int)frameSize.width <= 0 || (int)frameSize.height <= 0){
 
@@ -222,12 +218,13 @@ public class ARDataProvider extends JFrame {
 				inputVideo = new VideoCapture();
 
 				System.out.println("Trying input " + videoInID);
+				
 				inputVideo.open(videoInID);
 
 				Thread.sleep(1000);
 
-//				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
-//				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
+				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
+				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
 //				inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
 				
 				frameSize = new Size((int)inputVideo.get(Highgui.CV_CAP_PROP_FRAME_WIDTH),(int)inputVideo.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
@@ -246,6 +243,14 @@ public class ARDataProvider extends JFrame {
 			}
 
 		}
+		
+		/*
+		VideoCapture inputVideo = new VideoCapture();
+		inputVideo.open("/dev/video0");
+		*/
+		
+		frameSize = new Size(640, 480);
+		
 
 		camPreviewPanel = new PreviewPanel();
 		camPreviewPanel.initialize((int)frameSize.width, (int)frameSize.height);
@@ -279,6 +284,28 @@ public class ARDataProvider extends JFrame {
 
 	}
 
+	public void addListener(RealityChangeListener l){
+		this.listeners.add(l);
+	}
+	
+	private void informListenersAppeared(TrackableObject t){
+		for(RealityChangeListener l : listeners){
+			l.objectAppeared(t);
+		}
+	}
+
+	private void informListenersChanged(TrackableObject t){
+		for(RealityChangeListener l : listeners){
+			l.objectChanged(t);
+		}
+	}
+
+	private void informListenersDisappeared(TrackableObject t){
+		for(RealityChangeListener l : listeners){
+			l.objectDisappeared(t);
+		}
+	}
+	
 	public void requestClose() {
 		stop();
 		this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
@@ -576,6 +603,7 @@ public class ARDataProvider extends JFrame {
 				TripcodeCandidateSample t = tripcodeData.poll();
 
 				TrackableTripcode trip = null;
+				boolean newCode = true;
 				
 				//Search if fiducial is close/overlapping with previously detected fiducials
 				for(TrackableTripcode tb : trackedTripcodes.values()){
@@ -583,6 +611,7 @@ public class ARDataProvider extends JFrame {
 					if(tb.getProximity(t.x, t.y) <= params.tripCenterDist){
 						trip = tb;
 						trip.update(t);
+						newCode = false;
 						break;
 					}
 				}
@@ -597,9 +626,18 @@ public class ARDataProvider extends JFrame {
 
 				if(trackedTripcodes.contains(id)){
 					trackedTripcodes.get(id).release();
+					newCode = false;
 				}
 				
-				trackedTripcodes.put((int)trip.getID(), trip);						
+				trackedTripcodes.put((int)trip.getID(), trip);
+
+				calibrator.applyCalibration(trip);
+
+				if(newCode){
+					informListenersAppeared(trip);
+				} else {
+					informListenersChanged(trip);
+				}
 
 			}
 
@@ -691,6 +729,9 @@ public class ARDataProvider extends JFrame {
 		}
 	}
 
+	public Reality getReality(){
+		return this.reality;
+	}
 
 	/* Note! 
 	 * When initializing sliders etc. check that the change listener 
@@ -1660,6 +1701,8 @@ public class ARDataProvider extends JFrame {
 	}//GEN-LAST:event_slider_zStateChanged
 
 	private void updateDistortionValues(){
-		distCoeffs.put(0,0, new float[]{params.k1*0.00000001f, params.k2*0.0000000000001f, params.p1*0.000001f, params.p2*0.000001f, params.k3*0.0000000000000000001f});
+		float[] f = new float[]{params.k1*0.00000001f, params.k2*0.0000000000001f, params.p1*0.000001f, params.p2*0.000001f, params.k3*0.0000000000000000001f};
+		System.out.println(params.k1 + " " + params.k2 + " " + params.k3 + " " + params.p1 + " " + params.p2 );
+		distCoeffs.put(0,0, f);
 	}
 }

@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public class Params implements Serializable {
 	
+	public String videoSource = "/dev/video0";
+	
 	public enum MorphOps { none, dilate, erode }
 	public enum KernelShape { rect, ellipse }
 	public enum KernelSize { size_3x3, size_5x5, size_7x7, size_9x9 }

@@ -8,12 +8,14 @@ public abstract class TrackableObject {
 	public enum ItemType { blob, tripFiducial }
 	
 	protected ItemType itemType;
+
 	protected int id = -1;
 	
 	protected long timeLastSeen;
 	protected double x, y, z;
 	protected double rawX, rawY, rawZ;
 	protected double radius = 1;
+	protected double angle = 0;
 	protected double quality = 0;
 	protected boolean active = true;
 		
@@ -35,6 +37,10 @@ public abstract class TrackableObject {
 	
 	public double getProximity(double nx, double ny, double nz){
 		return Math.sqrt(Math.pow(this.rawX-nx, 2) + Math.pow(this.rawY-ny, 2) + Math.pow(this.rawZ-nz, 2));
+	}
+	
+	public ItemType getItemType() {
+		return itemType;
 	}
 	
 	public double getQuality(){
@@ -91,6 +97,10 @@ public abstract class TrackableObject {
 		this.y = cc[1];
 		if(cc.length > 2) this.z = cc[2];
 		//System.out.println(x + " " + y);
+	}
+
+	public double getAngle() {
+		return angle;
 	}
 
 }

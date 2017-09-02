@@ -76,7 +76,7 @@ public class TrackableTripcode extends TrackableObject {
 				g.drawImage(OpenCVUtils.matToBufferedImage(sample.rawFrame), (int)(getRawX()-sample.frameRadius), (int)(getRawY()-sample.frameRadius), null);
 			}
 			
-			//g.drawImage(debugImg2, (int)(getFixedRawX()-sample.frameRadius), (int)(getFixedRawY()-sample.frameRadius), null);
+			g.drawImage(debugImg, (int)(getFixedRawX()-sample.frameRadius), (int)(getFixedRawY()-sample.frameRadius), null);
 			g.setColor(TARGET_COLOR);
 			g.fillOval((int)getFixedRawX()-2, (int)getFixedRawY()-2, 4, 4);
 			g.drawOval((int)(getFixedRawX()-getRadius()), (int)(getFixedRawY()-getRadius()), (int)(getRadius()*2), (int)(getRadius()*2));
@@ -201,7 +201,7 @@ public class TrackableTripcode extends TrackableObject {
 			//int newCode = parseCodeByRays(sample.rawFrame, (Graphics2D)debugImg2.getGraphics());
 			
 			//Here we add to the angle (2 * 1/8) + (0.5 * 1/8) to center it with the markers
-			setCode(parseCode(sample.rawFrame, this.angle + (Math.PI*0.3125f), sample.frameRadius - xShift, sample.frameRadius-yShift));
+			setCode(parseCode(sample.rawFrame, this.angle + (Math.PI*0.3125f), sample.frameRadius - xShift, sample.frameRadius - yShift));
 			
 			
 			//if(newCode > 0) code_confirms[last_index] = newCode;
@@ -813,6 +813,9 @@ public class TrackableTripcode extends TrackableObject {
 		}
 		
 		private void setCode(int code){
+			
+			if(code < 0) return;
+			
 			this.assignedCodes[codeIndex] = code;
 			codeIndex++;
 			if(codeIndex >= MAX_BUFFERED_CODES) codeIndex = 0;

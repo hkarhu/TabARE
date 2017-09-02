@@ -120,14 +120,14 @@ public class Calibrator implements MouseListener, MouseMotionListener {
 	
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		System.out.println(draggedPointIndex);
+		//System.out.println(draggedPointIndex);
 		if(draggedPointIndex >= 0){
 			int x = (int)((draggedPointIndex/xPoints));
 			int y = (int)(draggedPointIndex%xPoints);
 			cMult[0][x][y] = e.getX();
 			cMult[1][x][y] = e.getY();
 			
-			System.out.println(e.getX());
+			//System.out.println(e.getX());
 		}
 	}
 	

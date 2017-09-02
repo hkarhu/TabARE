@@ -1,15 +1,18 @@
 package fi.conf.tabare;
 
-import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Reality {
-
-	private TreeMap<Integer, TrackableObject> trackedObjects;
 	
+	public ConcurrentLinkedQueue<TrackableBlob> trackedBlobs;
+	public ConcurrentHashMap<Integer,TrackableTripcode> trackedTripcodes;
+
 	private static volatile int lastGivenID = 0;
 	
 	public Reality() {
-		trackedObjects = new TreeMap<>();
+		trackedTripcodes = new ConcurrentHashMap<>();
+		trackedBlobs = new ConcurrentLinkedQueue<>();
 	}
 	
 	public static int getNewID(){
@@ -17,5 +20,12 @@ public class Reality {
 		return lastGivenID;
 	}
 	
+	public ConcurrentLinkedQueue<TrackableBlob> getTrackedBlobs() {
+		return trackedBlobs;
+	}
+
+	public ConcurrentHashMap<Integer, TrackableTripcode> getTrackedTripcodes() {
+		return trackedTripcodes;
+	}
 	
 }
